@@ -30,7 +30,7 @@ export const apiGiftcode = {
     return response;
   },
   delete: async (id: number) => {
-    const response = await HTTP.delete(`/giftcode/delete/${id}`);
+    const response = await HTTP.delete(`/giftcode/${id}`);
     return response;
   },
   update: async (id: number, data: any) => {

@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const search = req.nextUrl.searchParams.get("search");
 
   let queryStr = "SELECT * FROM item_option_template";
-  let params: any[] = [];
+  let params = [];
 
   if (search) {
     queryStr += " WHERE NAME LIKE ?";

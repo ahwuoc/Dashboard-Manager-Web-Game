@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area"; // Thêm ScrollArea
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Thêm Card
-import { Badge } from "@/components/ui/badge"; // Thêm Badge
 import { Trash2, Search, PlusCircle, X, Loader2, AlertCircle } from "lucide-react"; // Thêm icons
 import { format, parseISO } from "date-fns";
 import { Giftcode } from "../../handler/apiGiftcodes";
@@ -85,16 +84,15 @@ export default function GiftcodeDrawer({
                 count: giftcode.count_left, // Hoặc giftcode.count tùy theo logic
                 expired: giftcode.expired ? format(parseISO(giftcode.expired), "yyyy-MM-dd") : "",
             });
-            // Chuyển đổi detail của giftcode để hiển thị tên
             const detailedItems = giftcode.detail?.map(d => ({
                 ...d,
                 temp_name: allItems.find(i => i.id === d.temp_id)?.NAME || `ID: ${d.temp_id}`,
                 options: d.options.map(opt => ({
                     ...opt,
-                    name: allItemOptions.find(o => o.id === opt.id)?.NAME.split('#')[0] || `ID: ${opt.id}`
+                    name: allItemOptions.find(o => o.id === opt.id)?.NAME.toString().split('#')[0] || `ID: ${opt.id}`
                 }))
             })) || [];
-            setSelectedItems(detailedItems);
+            setSelectedItems(detailedItems as any);
         } else {
             // Reset form cho trường hợp "Tạo mới"
             setFormData({ code: "", count: 1, expired: "" });
@@ -176,7 +174,7 @@ export default function GiftcodeDrawer({
     };
 
     const handleOptionSelect = (option: ItemOption, itemIndex?: number) => { // itemIndex để chỉnh sửa option của item đã thêm
-        const newOption = { id: option.id, param: 0, name: option.NAME.split('#')[0] || `ID: ${option.id}` };
+        const newOption = { id: option.id, param: 0, name: option.NAME.toString().split('#')[0] || `ID: ${option.id}` };
         if (typeof itemIndex === 'number') { // Thêm/Sửa option cho item trong selectedItems
             const updatedSelectedItems = [...selectedItems];
             if (!updatedSelectedItems[itemIndex].options.find(o => o.id === option.id)) {
@@ -455,7 +453,7 @@ export default function GiftcodeDrawer({
                                                     className="p-2 hover:bg-indigo-100 cursor-pointer transition-colors text-sm"
                                                     onClick={() => handleOptionSelect(option)} // Sẽ thêm vào newItem
                                                 >
-                                                    {option.NAME.split('#')[0] || `Option ID: ${option.id}`}
+                                                    {option.NAME.toString().split('#')[0] || `Option ID: ${option.id}`}
                                                 </div>
                                             ))}
                                         </div>
@@ -465,7 +463,7 @@ export default function GiftcodeDrawer({
                                         {newItem.options.map((opt, index) => (
                                             <div key={index} className="flex items-center space-x-2 p-2 bg-white rounded shadow-sm">
                                                 <span className="text-sm text-gray-800 flex-grow">
-                                                    {opt.name || allItemOptions.find(o => o.id === opt.id)?.NAME.split('#')[0] || `Option ID: ${opt.id}`}
+                                                    {opt.name || allItemOptions.find(o => o.id === opt.id)?.NAME.toString().split('#')[0] || `Option ID: ${opt.id}`}
                                                 </span>
                                                 <Input
                                                     type="number"
@@ -511,11 +509,7 @@ export default function GiftcodeDrawer({
                                                         </h4>
                                                         <p className="text-sm text-gray-600">Số lượng: {sItem.quantity}</p>
                                                     </div>
-                                                    <Button variant="ghost" size="icon" onClick={() => removeItem(itemIdx)} disabled={isSubmitting} title="Xóa Item này khỏi Giftcode">
-                                                        <Trash2 className="h-5 w-5 text-red-600 hover:text-red-800" />
-                                                    </Button>
                                                 </div>
-
                                                 <div className="mt-3 space-y-2">
                                                     <Label className="text-xs font-medium text-gray-500 uppercase">Options:</Label>
                                                     {sItem.options.length > 0 ? (
@@ -524,7 +518,7 @@ export default function GiftcodeDrawer({
                                                             return (
                                                                 <div key={optIdx} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
                                                                     <span className="text-sm text-gray-700 flex-grow">
-                                                                        {optMeta?.NAME.split('#')[0] || `Option ID: ${opt.id}`}
+                                                                        {optMeta?.NAME.toString().split('#')[0] || `Option ID: ${opt.id}`}
                                                                     </span>
                                                                     <Input
                                                                         type="number"

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { query } from "@/app/database/db";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const result = await query("SELECT * FROM item_template");
     return NextResponse.json(result);

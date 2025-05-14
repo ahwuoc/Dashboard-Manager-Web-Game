@@ -7,7 +7,6 @@ export async function POST(request: Request) {
     const requestBody = await request.json();
     const { code, count, expired, detail } = requestBody.body;
 
-    // Nếu không có expired, tự động lấy thời gian hiện tại
     const formattedExpired = expired
       ? format(new Date(expired), "yyyy-MM-dd HH:mm:ss")
       : format(new Date(), "yyyy-MM-dd HH:mm:ss");
@@ -22,14 +21,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // Thực hiện truy vấn INSERT
     const result = await query(
       "INSERT INTO giftcode (code, count_left, detail, expired, type) VALUES (?, ?, ?, ?, ?)",
       [code, count, JSON.stringify(detail), formattedExpired, 0]
     );
 
     return NextResponse.json(
-      { success: true, message: "Giftcode created successfully" },
+      { success: true, message: "Giftcode created successfully", result },
       { status: 201 }
     );
   } catch (error) {

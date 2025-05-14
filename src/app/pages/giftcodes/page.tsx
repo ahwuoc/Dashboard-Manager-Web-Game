@@ -19,7 +19,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
 import { format } from 'date-fns';
 import { toast } from "sonner";
 import GiftcodeDrawer from "./GiftcodeDrawer";
@@ -160,7 +160,7 @@ export default function ManageGiftcodes() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody className="bg-white divide-y divide-gray-200">
-                                    {giftcodes.map((giftcode) => (
+                                    {giftcodes.map((giftcode: any) => (
                                         <TableRow key={giftcode.id} className="hover:bg-gray-50 transition-colors">
                                             <TableCell className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{giftcode.id}</TableCell>
                                             <TableCell className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 font-semibold">{giftcode.code}</TableCell>
@@ -175,7 +175,7 @@ export default function ManageGiftcodes() {
                                             <TableCell className="px-4 py-3 text-sm text-gray-700">
                                                 {giftcode.detail?.length ? (
                                                     <div className="space-y-2">
-                                                        {giftcode.detail.map((d, idx) => {
+                                                        {giftcode.detail.map((d: any, idx: number) => {
                                                             const item = items.find(i => i.id === d.temp_id);
                                                             return (
                                                                 <div key={idx} className="p-2 border rounded-md bg-gray-50">
@@ -185,13 +185,13 @@ export default function ManageGiftcodes() {
                                                                     </div>
                                                                     {d.options?.length > 0 && (
                                                                         <div className="mt-1 space-x-1 space-y-1">
-                                                                            {d.options.map((opt, i) => {
+                                                                            {d.options.map((opt: any, i: number) => {
                                                                                 const optMeta = itemOptions.find(o => o.id === opt.id);
                                                                                 return (
                                                                                     <>
                                                                                         <Badge key={i} variant="outline" className="text-xs">
                                                                                             {optMeta
-                                                                                                ? `${optMeta.NAME.split('#')[0] || 'Option'}: +${opt.param}`
+                                                                                                ? `${optMeta.NAME.toString().split('#')[0] || 'Option'}: +${opt.param}`
                                                                                                 : `ID: ${opt.id}, Val: ${opt.param}`}
                                                                                         </Badge>
 
