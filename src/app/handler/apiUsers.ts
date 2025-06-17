@@ -9,7 +9,9 @@ export const apiUser = {
   getAll: () => HTTP.get<ApiResponse<account[]>>("/api/users"),
 
   getById: (id: number) => HTTP.get<ApiResponse<account>>(`/api/users/${id}`),
-
+  update(userId: number, data: Partial<account>) {
+    return HTTP.put<ApiResponse<account>>(`/api/users/${userId}`, data);
+  },
   delete: (id: number) => HTTP.delete<ApiResponse<account>>(`/api/users/${id}`),
   addCoin: (id: number, coinAmount: number) =>
     HTTP.post<ApiResponse<account>>(`/api/users/${id}`, coinAmount),

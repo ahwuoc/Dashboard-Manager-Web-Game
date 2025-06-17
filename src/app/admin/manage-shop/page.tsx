@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Table,
   Card,
@@ -18,6 +17,7 @@ import {
   Form,
   InputNumber,
   Switch,
+  Select,
 } from "antd";
 import {
   EditOutlined,
@@ -26,13 +26,19 @@ import {
   SearchOutlined,
   ShoppingOutlined,
   SettingOutlined,
+  PictureOutlined, // Thêm icon cho icon_spec
 } from "@ant-design/icons";
 import { item_shop, item_template } from "@/generated/prisma";
 import type { ColumnsType } from "antd/es/table";
 import { apiShopItems } from "@/app/handler/apiShopItems";
 import { useRouter } from "next/navigation";
+import { apiItems } from "@/app/handler/apiItems";
+import { GiftcodeItemType } from "@/app/common/constant";
+
 const { Title, Text } = Typography;
 const { Search } = Input;
+const { Option } = Select;
+
 export default function ShopManagementPage() {
   const [search, setSearch] = useState("");
   const [selectedItem, setSelectedItem] = useState<item_shop | null>(null);
@@ -41,11 +47,13 @@ export default function ShopManagementPage() {
   const [loading, setLoading] = useState(true);
   const [editLoading, setEditLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [items, setItems] = useState<item_template[]>([]); // Danh sách item_template có sẵn
   const [form] = Form.useForm();
   const router = useRouter();
 
   useEffect(() => {
     fetchShopItems();
+    fetchItems();
   }, []);
 
   const fetchShopItems = async () => {
@@ -63,10 +71,30 @@ export default function ShopManagementPage() {
     }
   };
 
+  const fetchItems = async () => {
+    try {
+      const response = await apiItems.getAll();
+      if (response.payload) {
+        setItems(response.payload.data);
+      }
+    } catch (error) {
+      console.error("Lỗi khi fetch item templates:", error);
+      messageApi.error("Không thể tải danh sách item templates");
+    }
+  };
+
+  const debouncedSearch = useCallback((value: string) => {
+    setSearch(value);
+  }, []);
+
   const filteredItems = shopItems.filter(
     (item) =>
       item.id?.toString().includes(search.toLowerCase()) ||
-      item.temp_id?.toString().includes(search.toLowerCase()),
+      item.temp_id?.toString().includes(search.toLowerCase()) ||
+      items
+        .find((temp) => temp.id === item.temp_id)
+        ?.NAME.toLowerCase()
+        .includes(search.toLowerCase()),
   );
 
   const handleEditClick = (item: item_shop) => {
@@ -77,7 +105,7 @@ export default function ShopManagementPage() {
       is_sell: item.is_sell,
       type_sell: item.type_sell,
       cost: item.cost,
-      icon_spec: item.icon_spec,
+      icon_spec: item.icon_spec, // Gán giá trị icon_spec
     });
     setIsEditModalOpen(true);
   };
@@ -86,20 +114,26 @@ export default function ShopManagementPage() {
     router.push(`/admin/manage-shop/options/${itemId}`);
   };
 
-  const handleEditSubmit = async (values: item_template) => {
+  interface EditFormValues {
+    temp_id: number;
+    is_new?: boolean;
+    is_sell?: boolean;
+    type_sell?: number;
+    cost?: number;
+    icon_spec?: number; // Cập nhật type cho EditFormValues
+  }
+
+  const handleEditSubmit = async (values: EditFormValues) => {
     if (!selectedItem) return;
     try {
       setEditLoading(true);
       const updatedData = {
         ...values,
       };
-      setShopItems(
-        shopItems.map((item) =>
-          item.id === selectedItem.id ? { ...item, ...updatedData } : item,
-        ),
-      );
+
       const response = await apiShopItems.update(selectedItem.id, updatedData);
       if (response.status === 200) {
+        fetchShopItems();
         messageApi.success("Cập nhật shop item thành công!");
         setIsEditModalOpen(false);
         setSelectedItem(null);
@@ -119,7 +153,7 @@ export default function ShopManagementPage() {
     try {
       const response = await apiShopItems.delete(itemId);
       if (response.status === 200) {
-        setShopItems(shopItems.filter((item) => item.id !== itemId));
+        fetchShopItems();
         messageApi.success("Xóa shop item thành công!");
       } else {
         messageApi.error("Xóa shop item thất bại. Vui lòng thử lại.");
@@ -127,6 +161,24 @@ export default function ShopManagementPage() {
     } catch (error) {
       console.error("Lỗi khi xóa shop item:", error);
       messageApi.error("Đã có lỗi xảy ra khi xóa shop item");
+    }
+  };
+
+  const getGiftcodeItemTypeName = (type: number | null | undefined) => {
+    if (type === null || type === undefined) return "N/A";
+    switch (type) {
+      case GiftcodeItemType.Ngoc:
+        return "Ngọc";
+      case GiftcodeItemType.VatPhamDacBiet:
+        return "Vật phẩm đặc biệt";
+      case GiftcodeItemType.HongNgoc:
+        return "Hồng Ngọc";
+      case GiftcodeItemType.Coupon:
+        return "Coupon";
+      case GiftcodeItemType.Vang:
+        return "Vàng";
+      default:
+        return `Không xác định (${type})`;
     }
   };
 
@@ -148,6 +200,15 @@ export default function ShopManagementPage() {
       render: (tempId: number) => <Text strong>{tempId}</Text>,
     },
     {
+      title: "Tên Item",
+      key: "item_name",
+      width: 200,
+      render: (_, record) => {
+        const itemTemplate = items.find((item) => item.id === record.temp_id);
+        return itemTemplate?.NAME || "Không rõ";
+      },
+    },
+    {
       title: "Trạng thái",
       key: "status",
       width: 150,
@@ -166,9 +227,9 @@ export default function ShopManagementPage() {
       title: "Loại bán",
       dataIndex: "type_sell",
       key: "type_sell",
-      width: 100,
+      width: 150,
       render: (typeSell: number | null) => (
-        <Text>{typeSell !== null ? typeSell : "N/A"}</Text>
+        <Text>{getGiftcodeItemTypeName(typeSell)}</Text>
       ),
     },
     {
@@ -184,13 +245,17 @@ export default function ShopManagementPage() {
       ),
     },
     {
-      title: "Icon Spec",
+      title: "Icon Spec (Item tham chiếu)", // Đổi tên cột cho rõ nghĩa hơn
       dataIndex: "icon_spec",
       key: "icon_spec",
-      width: 100,
-      render: (iconSpec: number | null) => (
-        <Text>{iconSpec !== null ? iconSpec : "N/A"}</Text>
-      ),
+      width: 150, // Tăng chiều rộng để hiển thị tên item
+      render: (iconSpec: number | null) => {
+        const iconItemTemplate = items.find((item) => item.id === iconSpec);
+        return (
+          iconItemTemplate?.NAME ||
+          (iconSpec !== null ? `ID: ${iconSpec}` : "N/A")
+        );
+      },
     },
     {
       title: "Hành động",
@@ -236,7 +301,6 @@ export default function ShopManagementPage() {
     },
   ];
 
-  // Tính toán thống kê
   const totalItems = shopItems.length;
   const newItems = shopItems.filter((item) => item.is_new).length;
   const sellingItems = shopItems.filter((item) => item.is_sell).length;
@@ -245,7 +309,6 @@ export default function ShopManagementPage() {
     <div style={{ padding: "24px" }}>
       {contextHolder}
 
-      {/* Header với thống kê */}
       <Card style={{ marginBottom: "24px" }}>
         <Row gutter={16} align="middle">
           <Col span={12}>
@@ -290,7 +353,6 @@ export default function ShopManagementPage() {
         </Row>
       </Card>
 
-      {/* Bảng dữ liệu */}
       <Card>
         <div style={{ marginBottom: "16px" }}>
           <Search
@@ -299,7 +361,7 @@ export default function ShopManagementPage() {
             enterButton={<SearchOutlined />}
             size="large"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => debouncedSearch(e.target.value)}
             style={{ maxWidth: "400px" }}
           />
         </div>
@@ -323,7 +385,6 @@ export default function ShopManagementPage() {
         />
       </Card>
 
-      {/* Modal chỉnh sửa */}
       <Modal
         title={
           <Space>
@@ -348,10 +409,26 @@ export default function ShopManagementPage() {
                   label="Template ID"
                   name="temp_id"
                   rules={[
-                    { required: true, message: "Vui lòng nhập Template ID!" },
+                    { required: true, message: "Vui lòng chọn Template ID!" },
                   ]}
                 >
-                  <InputNumber style={{ width: "100%" }} min={0} />
+                  <Select
+                    showSearch
+                    placeholder="Chọn Template ID"
+                    optionFilterProp="children"
+                    filterOption={(input, option) => {
+                      const childrenText = String(option?.children || "");
+                      return childrenText
+                        .toLowerCase()
+                        .includes(input.toLowerCase());
+                    }}
+                  >
+                    {items.map((item) => (
+                      <Option key={item.id} value={item.id}>
+                        {item.id} - {item.NAME}
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Col>
             </Row>
@@ -380,7 +457,19 @@ export default function ShopManagementPage() {
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item label="Loại bán" name="type_sell">
-                  <InputNumber style={{ width: "100%" }} min={0} />
+                  <Select
+                    placeholder="Chọn loại bán"
+                    style={{ width: "100%" }}
+                    allowClear
+                  >
+                    {Object.values(GiftcodeItemType)
+                      .filter((value) => typeof value === "number")
+                      .map((value) => (
+                        <Option key={value as number} value={value as number}>
+                          {getGiftcodeItemTypeName(value as number)}
+                        </Option>
+                      ))}
+                  </Select>
                 </Form.Item>
               </Col>
               <Col span={8}>
@@ -396,7 +485,27 @@ export default function ShopManagementPage() {
               </Col>
               <Col span={8}>
                 <Form.Item label="Icon Spec" name="icon_spec">
-                  <InputNumber style={{ width: "100%" }} min={0} />
+                  {/* Thay thế InputNumber bằng Select */}
+                  <Select
+                    showSearch
+                    placeholder="Chọn Item để lấy Icon"
+                    optionFilterProp="children"
+                    filterOption={(input, option) => {
+                      const childrenText = String(option?.children || "");
+                      return childrenText
+                        .toLowerCase()
+                        .includes(input.toLowerCase());
+                    }}
+                    allowClear
+                  >
+                    {items.map((item) => (
+                      <Option key={item.id} value={item.id}>
+                        <Space>
+                          <PictureOutlined /> {item.id} - {item.NAME}
+                        </Space>
+                      </Option>
+                    ))}
+                  </Select>
                 </Form.Item>
               </Col>
             </Row>

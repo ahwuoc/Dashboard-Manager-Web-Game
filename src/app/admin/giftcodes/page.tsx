@@ -19,7 +19,7 @@ import {
   Form,
   InputNumber,
   DatePicker,
-  Collapse,
+  Collapse, // Giữ lại import Collapse
   Divider,
 } from "antd";
 import {
@@ -30,7 +30,7 @@ import {
   CalendarOutlined,
   AppstoreOutlined,
   SettingOutlined,
-  PlusOutlined, // Thêm icon PlusOutlined cho nút tạo mới
+  PlusOutlined,
 } from "@ant-design/icons";
 import { apiGiftcode } from "@/app/handler/apiGiftcodes";
 import type { ColumnsType } from "antd/es/table";
@@ -41,7 +41,8 @@ import debounce from "lodash/debounce";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
-const { Panel } = Collapse;
+// Không cần Panel nữa vì sẽ dùng items prop của Collapse
+// const { Panel } = Collapse;
 
 export type GiftcodeWithItemsAndOptions = Prisma.giftcodeGetPayload<{
   include: {
@@ -58,11 +59,10 @@ export type GiftcodeWithItemsAndOptions = Prisma.giftcodeGetPayload<{
   };
 }>;
 
-// Định nghĩa kiểu dữ liệu cho form tạo mới giftcode
 interface CreateGiftcodeFormValues {
   code: string;
   count_left: number;
-  expired: dayjs.Dayjs; // Dùng Dayjs cho DatePicker
+  expired: dayjs.Dayjs;
 }
 
 const GiftcodeManagementPage: React.FC = () => {
@@ -71,16 +71,15 @@ const GiftcodeManagementPage: React.FC = () => {
   const [selectedGiftcode, setSelectedGiftcode] =
     useState<GiftcodeWithItemsAndOptions | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // State mới cho modal tạo
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [giftcodes, setGiftcodes] = useState<GiftcodeWithItemsAndOptions[]>([]);
   const [loading, setLoading] = useState(true);
   const [editLoading, setEditLoading] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false); // Loading state cho tạo mới
+  const [createLoading, setCreateLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const [editForm] = Form.useForm(); // Đổi tên form để dễ quản lý
-  const [createForm] = Form.useForm<CreateGiftcodeFormValues>(); // Form mới cho tạo
+  const [editForm] = Form.useForm();
+  const [createForm] = Form.useForm<CreateGiftcodeFormValues>();
 
-  // Fetch giftcodes
   const fetchGiftcodes = useCallback(async () => {
     try {
       setLoading(true);
@@ -98,7 +97,6 @@ const GiftcodeManagementPage: React.FC = () => {
     fetchGiftcodes();
   }, [fetchGiftcodes]);
 
-  // Debounce search input
   const debouncedSearch = useCallback(
     debounce((value: string) => setSearch(value), 300),
     [],
@@ -110,7 +108,6 @@ const GiftcodeManagementPage: React.FC = () => {
       giftcode.id.toString().includes(search.toLowerCase()),
   );
 
-  // Handle edit giftcode
   const handleEditClick = (giftcode: GiftcodeWithItemsAndOptions) => {
     setSelectedGiftcode(giftcode);
     editForm.setFieldsValue({
@@ -135,7 +132,6 @@ const GiftcodeManagementPage: React.FC = () => {
         expired: values.expired.toISOString(),
       };
 
-      // Giả định API update nhận id và data
       const response = await apiGiftcode.update(
         selectedGiftcode.id,
         updatedData,
@@ -166,7 +162,6 @@ const GiftcodeManagementPage: React.FC = () => {
     }
   };
 
-  // --- Chức năng tạo Giftcode mới ---
   const handleCreateNewGiftcode = () => {
     createForm.resetFields();
     setIsCreateModalOpen(true);
@@ -177,14 +172,13 @@ const GiftcodeManagementPage: React.FC = () => {
       setCreateLoading(true);
       const newGiftcodeData = {
         ...values,
-        expired: values.expired.toISOString(), // Chuyển đổi Dayjs object sang ISO string
+        expired: values.expired.toISOString(),
       };
 
-      // Giả định API create nhận body dữ liệu
       const response = await apiGiftcode.create(newGiftcodeData);
       if (response.payload?.data) {
         messageApi.success("Tạo giftcode mới thành công!");
-        fetchGiftcodes(); // Fetch lại danh sách để hiển thị giftcode mới
+        fetchGiftcodes();
       } else {
         messageApi.error("Tạo giftcode thất bại!");
       }
@@ -197,7 +191,6 @@ const GiftcodeManagementPage: React.FC = () => {
       setCreateLoading(false);
     }
   };
-  // --- Kết thúc chức năng tạo Giftcode mới ---
 
   // Render giftcode items
   const renderGiftcodeItems = (items: any[]) => {
@@ -205,56 +198,53 @@ const GiftcodeManagementPage: React.FC = () => {
       return <Text type="secondary">Không có item</Text>;
     }
 
-    return (
-      <Collapse size="small" ghost>
-        {items.map((item, index) => (
-          <Panel
-            header={
-              <Space>
-                <AppstoreOutlined />
-                <Text strong>
-                  {item.item_template?.NAME || `Item ${item.item_id}`}
-                </Text>
-                <Tag color="blue">x{item.quantity}</Tag>
-              </Space>
-            }
-            key={index}
-          >
-            <div style={{ paddingLeft: 16 }}>
-              <Text strong>ID:</Text> {item.id}
-              <br />
-              <Text strong>Tên:</Text> {item.item_template?.NAME || "N/A"}
-              <br />
-              <Text strong>Số lượng:</Text> {item.quantity}
-              <br />
-              {item.giftcode_item_options?.length > 0 && (
-                <>
-                  <Divider style={{ margin: "8px 0" }} />
-                  <Text strong>Options:</Text>
-                  {item.giftcode_item_options.map(
-                    (option: any, optIndex: number) => (
-                      <div
-                        key={optIndex}
-                        style={{ marginLeft: 16, marginTop: 4 }}
-                      >
-                        <Space>
-                          <SettingOutlined />
-                          <Text>
-                            {option.item_option_template?.NAME ||
-                              `Option ${option.option_id}`}
-                            :
-                          </Text>
-                          <Tag color="green">{option.param}</Tag>
-                        </Space>
-                      </div>
-                    ),
-                  )}
-                </>
+    // Chuyển đổi mảng items thành định dạng mà Collapse.items mong đợi
+    const collapseItems = items.map((item, index) => ({
+      key: String(index), // key phải là string
+      label: (
+        <Space>
+          <AppstoreOutlined />
+          <Text strong>
+            {item.item_template?.NAME || `Item ${item.item_id}`}
+          </Text>
+          <Tag color="blue">x{item.quantity}</Tag>
+        </Space>
+      ),
+      children: (
+        <div style={{ paddingLeft: 16 }}>
+          <Text strong>ID:</Text> {item.id}
+          <br />
+          <Text strong>Tên:</Text> {item.item_template?.NAME || "N/A"}
+          <br />
+          <Text strong>Số lượng:</Text> {item.quantity}
+          <br />
+          {item.giftcode_item_options?.length > 0 && (
+            <>
+              <Divider style={{ margin: "8px 0" }} />
+              <Text strong>Options:</Text>
+              {item.giftcode_item_options.map(
+                (option: any, optIndex: number) => (
+                  <div key={optIndex} style={{ marginLeft: 16, marginTop: 4 }}>
+                    <Space>
+                      <SettingOutlined />
+                      <Text>
+                        {option.item_option_template?.NAME ||
+                          `Option ${option.option_id}`}
+                        :
+                      </Text>
+                      <Tag color="green">{option.param}</Tag>
+                    </Space>
+                  </div>
+                ),
               )}
-            </div>
-          </Panel>
-        ))}
-      </Collapse>
+            </>
+          )}
+        </div>
+      ),
+    }));
+
+    return (
+      <Collapse size="small" ghost items={collapseItems} /> // Sử dụng prop `items`
     );
   };
 
@@ -363,7 +353,6 @@ const GiftcodeManagementPage: React.FC = () => {
     },
   ];
 
-  // Tính toán thống kê
   const totalGiftcodes = giftcodes.length;
   const activeGiftcodes = giftcodes.filter((gc) => gc.count_left > 0).length;
   const expiredGiftcodes = giftcodes.filter((gc) =>
@@ -378,7 +367,6 @@ const GiftcodeManagementPage: React.FC = () => {
     <div style={{ padding: 24, background: "#f0f2f5" }}>
       {contextHolder}
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
-        {/* Header */}
         <Card>
           <Row gutter={[16, 16]} align="middle">
             <Col xs={24} lg={12}>
@@ -433,7 +421,6 @@ const GiftcodeManagementPage: React.FC = () => {
           </Row>
         </Card>
 
-        {/* Table & Search */}
         <Card>
           <Row gutter={[16, 16]} justify="space-between" align="middle">
             <Col xs={24} sm={12} md={8} lg={6}>
@@ -450,7 +437,7 @@ const GiftcodeManagementPage: React.FC = () => {
                 type="primary"
                 icon={<PlusOutlined />}
                 size="large"
-                onClick={handleCreateNewGiftcode} // Nút tạo giftcode mới
+                onClick={handleCreateNewGiftcode}
               >
                 Tạo Giftcode Mới
               </Button>
@@ -468,7 +455,6 @@ const GiftcodeManagementPage: React.FC = () => {
               showQuickJumper: true,
               showTotal: (total, range) =>
                 `${range[0]} - ${range[1]} của ${total} giftcode`,
-
               pageSizeOptions: ["10", "20", "50"],
             }}
             scroll={{ x: 1000 }}
@@ -487,7 +473,7 @@ const GiftcodeManagementPage: React.FC = () => {
                   <Text type="secondary">Không tìm thấy giftcode nào</Text>
                   <Button
                     type="dashed"
-                    onClick={handleCreateNewGiftcode} // Nút tạo giftcode khi rỗng
+                    onClick={handleCreateNewGiftcode}
                     icon={<PlusOutlined />}
                   >
                     Tạo Giftcode đầu tiên
@@ -498,7 +484,6 @@ const GiftcodeManagementPage: React.FC = () => {
           />
         </Card>
 
-        {/* Edit Modal */}
         <Modal
           title={
             <Space>
@@ -586,7 +571,6 @@ const GiftcodeManagementPage: React.FC = () => {
           </Form>
         </Modal>
 
-        {/* Create New Giftcode Modal */}
         <Modal
           title={
             <Space>
@@ -601,7 +585,7 @@ const GiftcodeManagementPage: React.FC = () => {
           }}
           footer={null}
           width={600}
-          destroyOnClose // Đảm bảo form reset mỗi lần đóng/mở
+          destroyOnClose
         >
           <Form
             form={createForm}

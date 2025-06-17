@@ -54,7 +54,7 @@ const menuItems: MenuProps["items"] = [
   {
     key: "/manage-item",
     icon: <BoxPlotOutlined />,
-    label: <Link href="/manage-item">Quản lý item</Link>,
+    label: <Link href="/admin/manage-item">Quản lý item</Link>,
   },
   {
     key: "/about",
@@ -261,13 +261,10 @@ export default function RootLayout({
                     pointerEvents: "none",
                   }}
                 />
-
-                {/* Main Content Container */}
                 <div
                   style={{
                     position: "relative",
                     zIndex: 1,
-                    maxWidth: "1200px",
                     margin: "0 auto",
                     background: "rgba(255, 255, 255, 0.8)",
                     borderRadius: "12px",

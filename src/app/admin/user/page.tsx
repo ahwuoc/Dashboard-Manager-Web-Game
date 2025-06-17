@@ -23,10 +23,10 @@ import {
 import {
   EditOutlined,
   UserOutlined,
-  DeleteOutlined,
   GiftOutlined,
   SearchOutlined,
   TeamOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import { apiUser } from "@/app/handler/apiUsers";
 import { account } from "@/generated/prisma";
@@ -36,6 +36,15 @@ import type { ColumnsType } from "antd/es/table";
 const { Title, Text } = Typography;
 const { Search } = Input;
 
+// Định nghĩa lại interface EditUserFormValues
+interface EditUserFormValues {
+  username: string;
+  coin?: number;
+  tongnap?: number;
+  is_admin?: boolean;
+  ban?: boolean; // Vẫn giữ là boolean ở frontend để khớp với Switch
+}
+
 export default function UserManagementPage() {
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<account | null>(null);
@@ -44,7 +53,7 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [editLoading, setEditLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<EditUserFormValues>();
 
   useEffect(() => {
     fetchUsers();
@@ -78,26 +87,34 @@ export default function UserManagementPage() {
       coin: user.coin,
       tongnap: user.tongnap,
       is_admin: user.is_admin,
+      // Khi đọc từ Prisma (có thể là number 0/1) sang form (boolean), cần chuyển đổi
+      ban: user.ban === 1 ? true : false, // Chuyển 0/1 từ DB sang true/false cho Switch
     });
     setIsEditModalOpen(true);
   };
 
-  const handleEditSubmit = async (values: any) => {
+  const handleEditSubmit = async (values: EditUserFormValues) => {
     if (!selectedUser) return;
 
     try {
       setEditLoading(true);
-      // Gọi API update user ở đây
-      // const response = await apiUser.update(selectedUser.id, values);
 
-      // Cập nhật local state
-      setUsers(
-        users.map((user) =>
-          user.id === selectedUser.id ? { ...user, ...values } : user,
-        ),
-      );
+      // Chuyển đổi giá trị 'ban' từ boolean sang number (0 hoặc 1) trước khi gửi
+      const dataToSend = {
+        ...values,
+        ban: values.ban ? 1 : 0, // Convert boolean (true/false) to number (1/0)
+      };
 
-      messageApi.success("Cập nhật thông tin user thành công!");
+      const response = await apiUser.update(selectedUser.id, dataToSend); // Gửi data đã được chuyển đổi
+
+      if (response.payload?.data) {
+        // Sau khi update thành công, fetch lại users để đảm bảo UI đồng bộ với DB
+        fetchUsers();
+        messageApi.success("Cập nhật thông tin user thành công!");
+      } else {
+        messageApi.error("Cập nhật thông tin user thất bại!");
+      }
+
       setIsEditModalOpen(false);
       setSelectedUser(null);
       form.resetFields();
@@ -109,19 +126,26 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleDeleteUser = async (userId: number) => {
+  // Hàm "cấm" người dùng thay vì xóa
+  const handleBanUser = async (userId: number, banStatus: boolean) => {
     try {
-      const response = await apiUser.delete(userId);
+      // Chuyển đổi trạng thái cấm boolean sang number (0 hoặc 1)
+      const statusToSend = banStatus ? 1 : 0; // Convert boolean to number (1 for banned, 0 for not)
 
-      if (response.status === 200) {
-        setUsers(users.filter((user) => user.id !== userId));
-        messageApi.success("Xóa user thành công!");
+      const response = await apiUser.update(userId, { ban: statusToSend }); // Gửi giá trị số
+
+      if (response.payload?.data) {
+        // Sau khi thao tác thành công, fetch lại users để cập nhật UI
+        fetchUsers();
+        messageApi.success(`${banStatus ? "Cấm" : "Bỏ cấm"} user thành công!`);
       } else {
-        messageApi.error("Xóa user thất bại. Vui lòng thử lại.");
+        messageApi.error(
+          `${banStatus ? "Cấm" : "Bỏ cấm"} user thất bại. Vui lòng thử lại.`,
+        );
       }
     } catch (error) {
-      console.error("Lỗi khi xóa user:", error);
-      messageApi.error("Đã có lỗi xảy ra khi xóa user");
+      console.error("Lỗi khi cấm/bỏ cấm user:", error);
+      messageApi.error("Đã có lỗi xảy ra khi xử lý user");
     }
   };
 
@@ -158,6 +182,24 @@ export default function UserManagementPage() {
       onFilter: (value, record) => record.is_admin === value,
       render: (isAdmin: boolean) => (
         <Tag color={isAdmin ? "red" : "blue"}>{isAdmin ? "Admin" : "User"}</Tag>
+      ),
+    },
+    {
+      title: "Trạng thái Cấm",
+      dataIndex: "ban",
+      key: "ban",
+      width: 120,
+      filters: [
+        { text: "Đang Cấm", value: 1 }, // Lọc theo giá trị số
+        { text: "Không Cấm", value: 0 },
+      ],
+      onFilter: (value, record) => record.ban === value,
+      render: (
+        ban: number, // Render giá trị số từ DB
+      ) => (
+        <Tag color={ban === 1 ? "red" : "green"}>
+          {ban === 1 ? "Đang Cấm" : "Bình thường"}
+        </Tag>
       ),
     },
     {
@@ -199,15 +241,20 @@ export default function UserManagementPage() {
             Sửa
           </Button>
           <Popconfirm
-            title="Xóa người dùng"
-            description={`Bạn có chắc chắn muốn xóa user "${record.username}"?`}
-            onConfirm={() => handleDeleteUser(record.id)}
-            okText="Có"
-            cancelText="Không"
-            okType="danger"
+            title={record.ban === 1 ? "Bỏ cấm người dùng" : "Cấm người dùng"}
+            description={`Bạn có chắc chắn muốn ${record.ban === 1 ? "bỏ cấm" : "cấm"} user "${record.username}" này?`}
+            onConfirm={() => handleBanUser(record.id, !(record.ban === 1))} // Chuyển đổi 0/1 sang boolean để truyền cho handleBanUser
+            okText={record.ban === 1 ? "Bỏ cấm" : "Cấm"}
+            cancelText="Hủy"
+            okType={record.ban === 1 ? "default" : "danger"}
           >
-            <Button danger size="small" icon={<DeleteOutlined />}>
-              Xóa
+            <Button
+              danger={record.ban !== 1}
+              type={record.ban === 1 ? "default" : "primary"}
+              size="small"
+              icon={<StopOutlined />}
+            >
+              {record.ban === 1 ? "Bỏ Cấm" : "Cấm"}
             </Button>
           </Popconfirm>
           <Link href={`user/gift?id=${record.id}`}>
@@ -225,20 +272,15 @@ export default function UserManagementPage() {
     },
   ];
 
-  // Tính toán thống kê
   const totalUsers = users.length;
   const adminUsers = users.filter((user) => user.is_admin).length;
+  const bannedUsers = users.filter((user) => user.ban === 1).length; // Thống kê dựa trên giá trị số
   const totalCoins = users.reduce((sum, user) => sum + (user.coin || 0), 0);
-  const totalDeposits = users.reduce(
-    (sum, user) => sum + (user.tongnap || 0),
-    0,
-  );
 
   return (
     <div style={{ padding: "24px" }}>
       {contextHolder}
 
-      {/* Header với thống kê */}
       <Card style={{ marginBottom: "24px" }}>
         <Row gutter={16} align="middle">
           <Col span={12}>
@@ -273,16 +315,16 @@ export default function UserManagementPage() {
               </Col>
               <Col span={6}>
                 <Statistic
-                  title="Tổng Coin"
-                  value={totalCoins}
-                  valueStyle={{ color: "#faad14" }}
+                  title="Đang Cấm"
+                  value={bannedUsers}
+                  valueStyle={{ color: "#fa541c" }}
                 />
               </Col>
               <Col span={6}>
                 <Statistic
-                  title="Tổng Nạp"
-                  value={totalDeposits}
-                  valueStyle={{ color: "#52c41a" }}
+                  title="Tổng Coin"
+                  value={totalCoins}
+                  valueStyle={{ color: "#faad14" }}
                 />
               </Col>
             </Row>
@@ -290,7 +332,6 @@ export default function UserManagementPage() {
         </Row>
       </Card>
 
-      {/* Bảng dữ liệu */}
       <Card>
         <div style={{ marginBottom: "16px" }}>
           <Search
@@ -335,7 +376,6 @@ export default function UserManagementPage() {
         />
       </Card>
 
-      {/* Modal chỉnh sửa */}
       <Modal
         title={
           <Space>
@@ -362,6 +402,8 @@ export default function UserManagementPage() {
               coin: selectedUser.coin,
               tongnap: selectedUser.tongnap,
               is_admin: selectedUser.is_admin,
+              // Khi đọc từ Prisma (có thể là number 0/1) sang form (boolean), cần chuyển đổi
+              ban: selectedUser.ban === 1 ? true : false, // Đã chuyển đổi
             }}
           >
             <Row gutter={16}>
@@ -441,6 +483,21 @@ export default function UserManagementPage() {
                       `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
                     parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  label="Trạng thái Cấm"
+                  name="ban"
+                  valuePropName="checked"
+                >
+                  <Switch
+                    checkedChildren="Đang Cấm"
+                    unCheckedChildren="Bình thường"
                   />
                 </Form.Item>
               </Col>
