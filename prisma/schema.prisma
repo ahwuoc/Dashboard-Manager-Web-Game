@@ -155,13 +155,12 @@ model flag_bag {
 }
 
 model giftcode {
-  id         Int      @id @default(autoincrement())
-  code       String   @db.VarChar(255)
-  count_left Int
-  detail     String   @db.Text
-  datecreate DateTime @default(now()) @db.Timestamp(0)
-  expired    DateTime @default(dbgenerated("('0000-00-00 00:00:00')")) @db.Timestamp(0)
-  itemoption String   @db.Text
+  id             Int              @id @default(autoincrement())
+  code           String           @db.VarChar(255)
+  count_left     Int
+  datecreate     DateTime         @default(now()) @db.Timestamp(0)
+  expired        DateTime         @default(now()) @db.Timestamp(0)
+  giftcode_items giftcode_items[]
 }
 
 model head_avatar {
@@ -239,9 +238,10 @@ model intrinsic {
 }
 
 model item_option_template {
-  id               Int                @id
-  NAME             String             @db.VarChar(255)
-  item_shop_option item_shop_option[] @ignore
+  id                    Int                     @id
+  NAME                  String                  @db.VarChar(255)
+  giftcode_item_options giftcode_item_options[]
+  item_shop_option      item_shop_option[]
 }
 
 model item_shop {
@@ -254,7 +254,7 @@ model item_shop {
   cost             Int?               @default(0)
   icon_spec        Int?               @default(0)
   create_time      DateTime?          @default(now()) @db.Timestamp(0)
-  item_shop_option item_shop_option[] @ignore
+  item_shop_option item_shop_option[]
 
   @@index([tab_id], map: "tab_id")
   @@index([temp_id], map: "temp_id")
@@ -268,26 +268,27 @@ model item_shop_option {
   item_shop            item_shop            @relation(fields: [item_shop_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "item_shop_option_ibfk_1")
   item_option_template item_option_template @relation(fields: [option_id], references: [id], onUpdate: Restrict, map: "item_shop_option_ibfk_2")
 
+  @@id([item_shop_id, option_id])
   @@index([item_shop_id], map: "item_shop_id")
   @@index([option_id], map: "option_id")
-  @@ignore
 }
 
 model item_template {
-  id            Int     @id
-  TYPE          Int
-  gender        Int     @db.SmallInt
-  NAME          String  @db.VarChar(255)
-  description   String  @db.VarChar(255)
-  icon_id       Int
-  part          Int
-  is_up_to_up   Boolean
-  power_require Int
-  gold          Int     @default(0)
-  gem           Int     @default(0)
-  head          Int     @default(-1)
-  body          Int     @default(-1)
-  leg           Int     @default(-1)
+  id             Int              @id
+  TYPE           Int
+  gender         Int              @db.SmallInt
+  NAME           String           @db.VarChar(255)
+  description    String           @db.VarChar(255)
+  icon_id        Int
+  part           Int
+  is_up_to_up    Boolean
+  power_require  Int
+  gold           Int              @default(0)
+  gem            Int              @default(0)
+  head           Int              @default(-1)
+  body           Int              @default(-1)
+  leg            Int              @default(-1)
+  giftcode_items giftcode_items[]
 }
 
 model map_template {
@@ -584,4 +585,29 @@ model received_items_options {
   received_items   received_items @relation(fields: [received_item_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "received_items_options_ibfk_1")
 
   @@index([received_item_id], map: "received_item_id")
+}
+
+model giftcode_item_options {
+  id                   Int                   @id @default(autoincrement())
+  giftcode_item_id     Int
+  param                Int
+  option_id            Int?
+  giftcode_items       giftcode_items        @relation(fields: [giftcode_item_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_giftcode_item_options_item_id")
+  item_option_template item_option_template? @relation(fields: [option_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_option_template_in_giftcode")
+
+  @@index([giftcode_item_id], map: "fk_giftcode_item_options_item_id")
+  @@index([option_id], map: "fk_option_template_in_giftcode")
+}
+
+model giftcode_items {
+  id                    Int                     @id @default(autoincrement())
+  giftcode_id           Int
+  item_id               Int
+  quantity              Int?
+  giftcode_item_options giftcode_item_options[]
+  giftcode              giftcode                @relation(fields: [giftcode_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_giftcode_items_giftcode_id")
+  item_template         item_template           @relation(fields: [item_id], references: [id], onUpdate: Restrict, map: "fk_item_template")
+
+  @@index([giftcode_id], map: "fk_giftcode_items_giftcode_id")
+  @@index([item_id], map: "fk_item_template")
 }

@@ -42,19 +42,14 @@ const menuItems: MenuProps["items"] = [
     label: <Link href="/admin/user">Quản lý User</Link>,
   },
   {
-    key: "/manage-vegetables",
-    icon: <UserOutlined />,
-    label: <Link href="/manage-vegetables">Quản lý cải</Link>,
-  },
-  {
-    key: "/pages/giftcodes",
+    key: "/admin/giftcodes",
     icon: <GiftOutlined />,
-    label: <Link href="/pages/giftcodes">Quản lý code</Link>,
+    label: <Link href="/admin/giftcodes">Quản lý Giftcodes</Link>,
   },
   {
     key: "/manage-shop",
     icon: <ShoppingCartOutlined />,
-    label: <Link href="/manage-shop">Quản lý shop</Link>,
+    label: <Link href="/admin/manage-shop">Quản lý shop</Link>,
   },
   {
     key: "/manage-item",

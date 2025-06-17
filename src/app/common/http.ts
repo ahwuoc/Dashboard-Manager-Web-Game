@@ -59,7 +59,7 @@ const http = {
     await request<T>("POST", url, { ...options, body }),
   put: async <T>(url: string, body: unknown, options?: OptionsInit) =>
     await request<T>("PUT", url, { ...options, body }),
-  delete: async <T>(url: string, options?: OptionsInit) =>
-    await request<T>("DELETE", url, options),
+  delete: async <T>(url: string, body?: unknown, options?: OptionsInit) =>
+    await request<T>("DELETE", url, { ...options, body }),
 };
 export default http;
