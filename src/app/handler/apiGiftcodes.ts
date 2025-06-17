@@ -25,7 +25,7 @@ export const apiGiftcode = {
     const response = await HTTP.get(`/giftcode/${id}`);
     return response;
   },
-  create: async (body: any) => {
+  create: async (body: unknown) => {
     const response = await HTTP.post("/giftcode/create", { body });
     return response;
   },
@@ -33,7 +33,7 @@ export const apiGiftcode = {
     const response = await HTTP.delete(`/giftcode/${id}`);
     return response;
   },
-  update: async (id: number, data: any) => {
+  update: async (id: number, data: unknown) => {
     const response = await HTTP.post(`/giftcode/update/${id}`, data);
     return response;
   },

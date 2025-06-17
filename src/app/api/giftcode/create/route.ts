@@ -1,40 +1,37 @@
 import { NextResponse } from "next/server";
-import { query } from "../../../database/db";
-import { format } from "date-fns";
-
+import { prisma } from "@/lib/prisma";
 export async function POST(request: Request) {
   try {
-    const requestBody = await request.json();
-    const { code, count, expired, detail } = requestBody.body;
+    const { code, count, expired, detail } = await request.json();
 
-    const formattedExpired = expired
-      ? format(new Date(expired), "yyyy-MM-dd HH:mm:ss")
-      : format(new Date(), "yyyy-MM-dd HH:mm:ss");
-
-    console.log("Formatted expired:", formattedExpired);
-
-    // Kiểm tra dữ liệu đầu vào
+    // Format thời gian hết hạn
+    const formattedExpired = expired ? new Date(expired) : new Date();
     if (!Array.isArray(detail) || detail.length === 0) {
       return NextResponse.json(
         { error: "Detail must be a non-empty array" },
-        { status: 400 }
+        { status: 400 },
       );
     }
-
-    const result = await query(
-      "INSERT INTO giftcode (code, count_left, detail, expired, type) VALUES (?, ?, ?, ?, ?)",
-      [code, count, JSON.stringify(detail), formattedExpired, 0]
-    );
+    const result = await prisma.giftcode.create({
+      data: {
+        code,
+        count_left: count,
+        detail: JSON.stringify(detail),
+        expired: formattedExpired,
+        itemoption: JSON.stringify({}),
+        datecreate: new Date(),
+      },
+    });
 
     return NextResponse.json(
       { success: true, message: "Giftcode created successfully", result },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating data:", error);
     return NextResponse.json(
       { error: "Failed to create data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

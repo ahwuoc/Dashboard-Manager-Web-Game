@@ -1,6 +1,8 @@
-import Dashboard from "./pages/page";
-export default function Home() {
+import { Home } from "lucide-react";
+export default function Page() {
   return (
-    <Dashboard />
+    <>
+      <Home />
+    </>
   );
 }

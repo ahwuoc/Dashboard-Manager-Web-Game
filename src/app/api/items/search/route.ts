@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const search = req.nextUrl.searchParams.get("search");
 
   try {
-    const data = await prisma.item_option_template.findMany({
+    const items = await prisma.item_template.findMany({
       where: search
         ? {
             NAME: {
@@ -15,9 +15,9 @@ export async function GET(req: NextRequest) {
         : undefined,
     });
 
-    return NextResponse.json({ data }, { status: 200 });
+    return NextResponse.json({ data: items }, { status: 200 });
   } catch (error) {
-    console.error("Lỗi khi truy vấn dữ liệu:", error);
+    console.error("Lỗi khi tìm item:", error);
     return NextResponse.json(
       { message: "Lỗi khi truy vấn dữ liệu." },
       { status: 500 },

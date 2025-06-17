@@ -1,18 +1,18 @@
 import HTTP from "../common/http";
+import type { item_option_template } from "@/generated/prisma";
 
-export interface ItemOption {
-  id: number;
-  NAME: number;
-  type: number;
-}
+type ResponseApi<T> = {
+  data: T;
+  message?: string;
+};
 
 export const apiOptions = {
-  getList: async () => HTTP.get<ItemOption[]>("/options"),
+  getAll: async () =>
+    HTTP.get<ResponseApi<item_option_template[]>>("/api/options"),
   search: async (searchTerm: string) => {
     if (!searchTerm) throw new Error("Search term is required");
-    const response = await HTTP.get<ItemOption[]>(
-      `/options/search?search=${encodeURIComponent(searchTerm)}`
+    return HTTP.get<ResponseApi<item_option_template[]>>(
+      `/api/options/search?search=${encodeURIComponent(searchTerm)}`,
     );
-    return response;
   },
 };

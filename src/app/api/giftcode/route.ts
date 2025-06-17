@@ -1,17 +1,11 @@
 import { NextResponse } from "next/server";
-import { query } from "@/app/database/db";
-
-type GiftcodeRow = {
-  id: number;
-  detail: string; // lúc này vẫn là JSON string
-  // thêm các field khác nếu có
-};
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const result = (await query(
-      "SELECT * FROM giftcode ORDER BY id DESC"
-    )) as GiftcodeRow[];
+    const result = await prisma.giftcode.findMany({
+      orderBy: { id: "desc" },
+    });
     const cleanedData = result.map((row) => ({
       ...row,
       detail: JSON.parse(row.detail),
@@ -22,7 +16,7 @@ export async function GET() {
     console.error("Error fetching data:", error);
     return NextResponse.json(
       { error: "Failed to fetch data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
