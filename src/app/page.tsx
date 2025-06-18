@@ -1,8 +1,13 @@
-import Dashboard from "./admin/page";
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 export default function Page() {
-  return (
-    <>
-      <Dashboard />
-    </>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/pages");
+  }, []);
+
+  return null;
 }

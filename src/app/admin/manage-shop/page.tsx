@@ -26,7 +26,7 @@ import {
   SearchOutlined,
   ShoppingOutlined,
   SettingOutlined,
-  PictureOutlined, // Thêm icon cho icon_spec
+  PictureOutlined,
 } from "@ant-design/icons";
 import { item_shop, item_template } from "@/generated/prisma";
 import type { ColumnsType } from "antd/es/table";
@@ -34,7 +34,7 @@ import { apiShopItems } from "@/app/handler/apiShopItems";
 import { useRouter } from "next/navigation";
 import { apiItems } from "@/app/handler/apiItems";
 import { GiftcodeItemType } from "@/app/common/constant";
-
+import { getGiftcodeItemTypeName } from "./components/getGiftcodeItemTypeName";
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
@@ -105,7 +105,7 @@ export default function ShopManagementPage() {
       is_sell: item.is_sell,
       type_sell: item.type_sell,
       cost: item.cost,
-      icon_spec: item.icon_spec, // Gán giá trị icon_spec
+      icon_spec: item.icon_spec,
     });
     setIsEditModalOpen(true);
   };
@@ -120,7 +120,7 @@ export default function ShopManagementPage() {
     is_sell?: boolean;
     type_sell?: number;
     cost?: number;
-    icon_spec?: number; // Cập nhật type cho EditFormValues
+    icon_spec?: number;
   }
 
   const handleEditSubmit = async (values: EditFormValues) => {
@@ -130,7 +130,6 @@ export default function ShopManagementPage() {
       const updatedData = {
         ...values,
       };
-
       const response = await apiShopItems.update(selectedItem.id, updatedData);
       if (response.status === 200) {
         fetchShopItems();
@@ -161,24 +160,6 @@ export default function ShopManagementPage() {
     } catch (error) {
       console.error("Lỗi khi xóa shop item:", error);
       messageApi.error("Đã có lỗi xảy ra khi xóa shop item");
-    }
-  };
-
-  const getGiftcodeItemTypeName = (type: number | null | undefined) => {
-    if (type === null || type === undefined) return "N/A";
-    switch (type) {
-      case GiftcodeItemType.Ngoc:
-        return "Ngọc";
-      case GiftcodeItemType.VatPhamDacBiet:
-        return "Vật phẩm đặc biệt";
-      case GiftcodeItemType.HongNgoc:
-        return "Hồng Ngọc";
-      case GiftcodeItemType.Coupon:
-        return "Coupon";
-      case GiftcodeItemType.Vang:
-        return "Vàng";
-      default:
-        return `Không xác định (${type})`;
     }
   };
 
@@ -245,10 +226,10 @@ export default function ShopManagementPage() {
       ),
     },
     {
-      title: "Icon Spec (Item tham chiếu)", // Đổi tên cột cho rõ nghĩa hơn
+      title: "Icon Spec (Item tham chiếu)",
       dataIndex: "icon_spec",
       key: "icon_spec",
-      width: 150, // Tăng chiều rộng để hiển thị tên item
+      width: 150,
       render: (iconSpec: number | null) => {
         const iconItemTemplate = items.find((item) => item.id === iconSpec);
         return (
@@ -485,25 +466,23 @@ export default function ShopManagementPage() {
               </Col>
               <Col span={8}>
                 <Form.Item label="Icon Spec" name="icon_spec">
-                  {/* Thay thế InputNumber bằng Select */}
                   <Select
                     showSearch
                     placeholder="Chọn Item để lấy Icon"
                     optionFilterProp="children"
                     filterOption={(input, option) => {
-                      const childrenText = String(option?.children || "");
-                      return childrenText
-                        .toLowerCase()
-                        .includes(input.toLowerCase());
+                      const text =
+                        `${option?.value} ${option?.children}`.toLowerCase();
+                      return text.includes(input.toLowerCase());
                     }}
                     allowClear
                   >
                     {items.map((item) => (
-                      <Option key={item.id} value={item.id}>
+                      <Select.Option key={item.id} value={item.id}>
                         <Space>
                           <PictureOutlined /> {item.id} - {item.NAME}
                         </Space>
-                      </Option>
+                      </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
