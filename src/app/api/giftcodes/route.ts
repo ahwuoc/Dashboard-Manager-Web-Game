@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
@@ -86,6 +86,34 @@ export async function POST(request: Request) {
     console.error("Lỗi khi tạo giftcode:", error);
     return NextResponse.json(
       { message: "Lỗi khi tạo giftcode", error: String(error) },
+      { status: 500 },
+    );
+  }
+}
+export async function PUT(request: NextRequest) {
+  try {
+    const url = new URL(request.url);
+    const id = parseInt(url.searchParams.get("id") || "");
+
+    const body = await request.json();
+
+    const updated = await prisma.giftcode.update({
+      where: { id },
+      data: {
+        code: body.code,
+        count_left: body.count_left,
+        expired: body.expired,
+      },
+    });
+
+    return NextResponse.json({
+      message: "✅ Cập nhật thành công",
+      data: updated,
+    });
+  } catch (error) {
+    console.error("❌ Lỗi cập nhật giftcode:", error);
+    return NextResponse.json(
+      { message: "Lỗi khi cập nhật giftcode", error: String(error) },
       { status: 500 },
     );
   }

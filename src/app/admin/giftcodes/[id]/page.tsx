@@ -97,7 +97,7 @@ const GiftcodeOptionsPage: React.FC = () => {
     ItemOptionTemplate[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [availableItems, setAvailableItems] = useState<ItemTemplate[]>([]);
+  const [availableItems, setAvailableItems] = useState<item_template[]>([]);
   const [isOptionModalOpen, setIsOptionModalOpen] = useState(false);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [selectedOption, setSelectedOption] =
@@ -122,17 +122,32 @@ const GiftcodeOptionsPage: React.FC = () => {
 
     try {
       setLoading(true);
-      const [giftcodeItemsResponse, optionsResponse, itemsResponse] =
-        await Promise.all([
-          apiGiftcode.getById(giftcodeIdNumber),
-          apiOptions.getAll(),
-          apiItems.getAll(),
-        ]);
+      let giftcodeItemsResponse, optionsResponse, itemsResponse;
 
-      const itemsData = giftcodeItemsResponse.payload?.data || [];
-      setGiftcodeItems(itemsData);
-      setAvailableOptions(optionsResponse.payload?.data || []);
-      setAvailableItems(itemsResponse.payload?.data || []);
+      // Tách ra tránh lỗi
+      try {
+        giftcodeItemsResponse = await apiGiftcode.getById(giftcodeIdNumber);
+        console.log("✅ Giftcode response:", giftcodeItemsResponse);
+      } catch (err) {
+        console.error("❌ Lỗi getById:", err);
+      }
+
+      try {
+        optionsResponse = await apiOptions.getAll();
+        console.log("✅ Options response:", optionsResponse);
+      } catch (err) {
+        console.error("❌ Lỗi getAll options:", err);
+      }
+
+      try {
+        itemsResponse = await apiItems.getAll();
+        console.log("✅ Items response:", itemsResponse);
+      } catch (err) {
+        console.error("❌ Lỗi getAll items:", err);
+      }
+      setGiftcodeItems(giftcodeItemsResponse?.payload?.data || []);
+      setAvailableOptions(optionsResponse?.payload?.data || []);
+      setAvailableItems(itemsResponse?.payload?.data || []);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu giftcode items hoặc options:", error);
       messageApi.error("Không thể tải dữ liệu giftcode items hoặc options!");

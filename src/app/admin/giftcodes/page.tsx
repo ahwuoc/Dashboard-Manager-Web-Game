@@ -38,6 +38,8 @@ import dayjs from "dayjs";
 import { Prisma } from "@/generated/prisma";
 import { useRouter } from "next/navigation";
 import debounce from "lodash/debounce";
+import { platform } from "node:process";
+import { prerender } from "next/dist/server/app-render/entry-base";
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -131,12 +133,12 @@ const GiftcodeManagementPage: React.FC = () => {
         ...values,
         expired: values.expired.toISOString(),
       };
-
       const response = await apiGiftcode.update(
         selectedGiftcode.id,
         updatedData,
       );
       if (response.payload?.data) {
+        fetchGiftcodes();
         messageApi.success("Cập nhật giftcode thành công!");
       } else {
         messageApi.error("Cập nhật giftcode thất bại!");

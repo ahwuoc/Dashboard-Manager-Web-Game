@@ -1,5 +1,6 @@
-import { giftcode_item_options } from "@/generated/prisma";
+import { giftcode_item_options, giftcode } from "@/generated/prisma";
 import { GiftcodeItemWithOptions } from "../admin/giftcodes/[id]/page";
+
 import HTTP from "../common/http";
 import { GiftcodeWithItemsAndOptions } from "../admin/giftcodes/page";
 
@@ -49,5 +50,8 @@ export const apiGiftcode = {
     await HTTP.delete<ApiRespose<null>>(`/api/giftcodes?id=${id}`),
 
   update: async (id: number, data: unknown) =>
-    await HTTP.post<ApiRespose<unknown>>(`/giftcode/update/${id}`, data),
+    (await HTTP.put)<ApiRespose<Partial<giftcode>>>(
+      `/api/giftcodes?id=${id}`,
+      data,
+    ),
 };

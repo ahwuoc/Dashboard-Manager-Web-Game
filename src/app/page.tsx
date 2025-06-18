@@ -1,8 +1,8 @@
-import { Home } from "lucide-react";
+import SpinWheel from "./pages/home/page";
 export default function Page() {
   return (
     <>
-      <Home />
+      <SpinWheel />
     </>
   );
 }

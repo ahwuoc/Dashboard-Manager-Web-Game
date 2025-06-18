@@ -1,6 +1,40 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  console.log("data", id);
+  const numericId = parseInt(id);
+  const { body } = await req.json();
+
+  try {
+    const updated = await prisma.giftcode.update({
+      where: {
+        id: numericId,
+      },
+      data: {
+        code: body.code,
+        count_left: body.count_left,
+        expired: body.expired,
+      },
+    });
+
+    return NextResponse.json({
+      message: "Cập nhật thành công!",
+      data: updated,
+    });
+  } catch (error) {
+    console.error("PUT /giftcode_items/:id error:", error);
+    return NextResponse.json(
+      { message: "Lỗi khi cập nhật!", error },
+      { status: 500 },
+    );
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
