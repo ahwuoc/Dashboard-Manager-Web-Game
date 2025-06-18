@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     });
     if (login && login.password === password) {
       const token = jwt.sign(
-        { username: login.username, id: login.id },
+        { username: login.username, id: login.id, is_admin: login.is_admin },
         process.env.JWT_SECRET!,
         { expiresIn: "2h" },
       );
