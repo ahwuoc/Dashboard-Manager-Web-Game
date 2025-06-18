@@ -38,13 +38,8 @@ import dayjs from "dayjs";
 import { Prisma } from "@/generated/prisma";
 import { useRouter } from "next/navigation";
 import debounce from "lodash/debounce";
-import { platform } from "node:process";
-import { prerender } from "next/dist/server/app-render/entry-base";
-
 const { Title, Text } = Typography;
 const { Search } = Input;
-// Không cần Panel nữa vì sẽ dùng items prop của Collapse
-// const { Panel } = Collapse;
 
 export type GiftcodeWithItemsAndOptions = Prisma.giftcodeGetPayload<{
   include: {

@@ -1,8 +1,8 @@
-import SpinWheel from "./pages/home/page";
+import Dashboard from "./admin/page";
 export default function Page() {
   return (
     <>
-      <SpinWheel />
+      <Dashboard />
     </>
   );
 }
