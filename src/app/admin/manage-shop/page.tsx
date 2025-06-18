@@ -98,6 +98,9 @@ export default function ShopManagementPage() {
   );
 
   const handleEditClick = (item: item_shop) => {
+    const selectedIconTemplate = items.find(
+      (temp) => temp.id === item.icon_spec,
+    );
     setSelectedItem(item);
     form.setFieldsValue({
       temp_id: item.temp_id,
@@ -105,7 +108,9 @@ export default function ShopManagementPage() {
       is_sell: item.is_sell,
       type_sell: item.type_sell,
       cost: item.cost,
-      icon_spec: item.icon_spec,
+      icon_spec: selectedIconTemplate
+        ? selectedIconTemplate.icon_id
+        : item.icon_spec,
     });
     setIsEditModalOpen(true);
   };
@@ -124,6 +129,7 @@ export default function ShopManagementPage() {
   }
 
   const handleEditSubmit = async (values: EditFormValues) => {
+    console.log("values=>", values);
     if (!selectedItem) return;
     try {
       setEditLoading(true);
@@ -226,15 +232,17 @@ export default function ShopManagementPage() {
       ),
     },
     {
-      title: "Icon Spec (Item tham chiếu)",
+      title: "Vật Phẩm",
       dataIndex: "icon_spec",
       key: "icon_spec",
       width: 150,
       render: (iconSpec: number | null) => {
-        const iconItemTemplate = items.find((item) => item.id === iconSpec);
+        const iconItemTemplate = items.find(
+          (item) => item.icon_id === iconSpec,
+        );
         return (
           iconItemTemplate?.NAME ||
-          (iconSpec !== null ? `ID: ${iconSpec}` : "N/A")
+          (iconSpec !== null ? `Icon ID: ${iconSpec}` : "N/A")
         );
       },
     },
@@ -471,14 +479,22 @@ export default function ShopManagementPage() {
                     placeholder="Chọn Item để lấy Icon"
                     optionFilterProp="children"
                     filterOption={(input, option) => {
-                      const text =
-                        `${option?.value} ${option?.children}`.toLowerCase();
-                      return text.includes(input.toLowerCase());
+                      const lowerCaseInput = input.toLowerCase();
+                      const currentItemTemplate = items.find(
+                        (temp) => temp.icon_id === option?.value,
+                      );
+
+                      if (!currentItemTemplate) {
+                        return false;
+                      }
+                      const searchableText =
+                        `${currentItemTemplate.id} ${currentItemTemplate.icon_id} ${currentItemTemplate.NAME}`.toLowerCase();
+                      return searchableText.includes(lowerCaseInput);
                     }}
                     allowClear
                   >
                     {items.map((item) => (
-                      <Select.Option key={item.id} value={item.id}>
+                      <Select.Option key={item.id} value={item.icon_id}>
                         <Space>
                           <PictureOutlined /> {item.id} - {item.NAME}
                         </Space>
