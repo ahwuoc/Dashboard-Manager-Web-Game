@@ -22,12 +22,11 @@ export default function LoginPage() {
       console.error("Login error:", error);
     }
   };
-
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4 py-8 sm:px-6 lg:px-8">
       {contextHolder}
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-center mb-6 text-2xl font-bold text-gray-700">
+      <div className="w-full max-w-sm p-6 bg-white rounded-lg shadow-md sm:p-8 sm:max-w-md lg:p-10 lg:shadow-xl">
+        <h1 className="text-center mb-6 text-2xl font-bold text-gray-700 sm:text-3xl lg:text-4xl">
           Đăng Nhập
         </h1>
         <Form
@@ -43,8 +42,11 @@ export default function LoginPage() {
             ]}
           >
             <Input
-              prefix={<UserOutlined className="site-form-item-icon" />}
+              prefix={
+                <UserOutlined className="site-form-item-icon text-base sm:text-lg" />
+              }
               placeholder="Tên người dùng"
+              className="py-2 px-3 sm:py-3 sm:px-4 text-base sm:text-lg" // Tăng kích thước input
             />
           </Form.Item>
           <Form.Item
@@ -52,13 +54,20 @@ export default function LoginPage() {
             rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
             <Input
-              prefix={<LockOutlined className="site-form-item-icon" />}
+              prefix={
+                <LockOutlined className="site-form-item-icon text-base sm:text-lg" />
+              }
               type="password"
               placeholder="Mật khẩu"
+              className="py-2 px-3 sm:py-3 sm:px-4 text-base sm:text-lg" // Tăng kích thước input
             />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full">
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="w-full h-auto py-2.5 text-lg font-semibold sm:py-3 sm:text-xl lg:py-4 lg:text-2xl" // Điều chỉnh kích thước nút
+            >
               Đăng nhập
             </Button>
           </Form.Item>

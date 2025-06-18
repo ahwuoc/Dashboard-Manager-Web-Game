@@ -18,6 +18,7 @@ export default function middleware(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
   const pathname = request.nextUrl.pathname;
 
+  console.log(token);
   console.log("Middleware chạy vào:", pathname);
 
   const isLoginPage = pathname === "/pages/login";

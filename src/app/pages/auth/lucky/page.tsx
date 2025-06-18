@@ -230,7 +230,6 @@ const GridSpinWheel: React.FC = () => {
     }
     loadHistory();
   }, []);
-
   const startSpinAnimation = useCallback(
     (winningItem: RewardItem): (() => void) => {
       let currentIndex: number = -1;
@@ -241,7 +240,6 @@ const GridSpinWheel: React.FC = () => {
       const spinTick = (): void => {
         const elapsed: number = Date.now() - startTime;
         const progress: number = Math.min(elapsed / animationDuration, 1);
-
         currentIntervalSpeedRef.current = Math.min(
           currentIntervalSpeedRef.current +
             (maxIntervalSpeed - currentIntervalSpeedRef.current) *
