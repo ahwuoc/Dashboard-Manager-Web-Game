@@ -258,6 +258,7 @@ const GiftcodeManagementPage: React.FC = () => {
       title: "Mã Giftcode",
       dataIndex: "code",
       key: "code",
+      width: 200,
       sorter: (a, b) => (a.code || "").localeCompare(b.code || ""),
       render: (code: string) => (
         <Space>

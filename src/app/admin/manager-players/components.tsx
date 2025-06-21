@@ -78,8 +78,6 @@ export const ItemsContainerCell = ({
     </Button>
   );
 };
-
-// COMPONENT QUAN TRỌNG: Nhận "từ điển" từ cha để hiển thị đúng tên
 export const ItemDetailContent = ({
   items,
   itemTemplateMap,
@@ -89,7 +87,6 @@ export const ItemDetailContent = ({
   itemTemplateMap: Map<number, item_template>;
   optionTemplateMap: Map<number, item_option_template>;
 }) => {
-  // Hàm nội bộ để format chỉ số
   const formatOption = (name: string, param: number) => {
     return name.replace("#", param.toString());
   };

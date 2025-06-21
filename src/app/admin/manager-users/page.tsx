@@ -180,6 +180,7 @@ export default function UserManagementPage() {
       title: "Tên người dùng",
       dataIndex: "username",
       key: "username",
+      width: 100,
       sorter: (a, b) => (a.username || "").localeCompare(b.username || ""),
       render: (username: string) => (
         <Space>
@@ -242,6 +243,7 @@ export default function UserManagementPage() {
       title: "Coin",
       dataIndex: "coin",
       key: "coin",
+      width: 100,
       sorter: (a, b) => (a.coin || 0) - (b.coin || 0),
       render: (coin: number) => (
         <Text strong style={{ color: "#faad14" }}>

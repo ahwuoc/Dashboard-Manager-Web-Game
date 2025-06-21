@@ -35,7 +35,6 @@ import {
   ItemDetailContent,
 } from "./components";
 import { parseJson, parseItemsData } from "./utils";
-
 const { Title, Text } = Typography;
 const { Search } = Input;
 
@@ -66,7 +65,6 @@ export default function PlayersManagementPage() {
         ]);
 
         if (playerRes.payload?.data) {
-          // DÒNG QUAN TRỌNG NHẤT: PHẢI LUÔN GÁN `response.payload.data` ĐỂ STATE LÀ MỘT MẢNG (ARRAY)
           setPlayers(playerRes.payload.data);
         }
         if (itemRes.payload?.data) setItemTemplates(itemRes.payload.data);
@@ -165,13 +163,14 @@ export default function PlayersManagementPage() {
       dataIndex: "id",
       key: "id",
       sorter: (a, b) => a.id - b.id,
-      width: 80,
+      width: 10,
       render: (id) => <Text code>{id}</Text>,
     },
     {
       title: "Tên nhân vật",
       dataIndex: "name",
       key: "name",
+      width: 10,
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name) => <Text strong>{name}</Text>,
     },
@@ -179,7 +178,7 @@ export default function PlayersManagementPage() {
       title: "Hành tinh",
       dataIndex: "gender",
       key: "gender",
-      width: 120,
+      width: 10,
       filters: [
         { text: "Trái Đất", value: 0 },
         { text: "Namếc", value: 1 },
@@ -197,14 +196,14 @@ export default function PlayersManagementPage() {
       title: "Tài sản",
       dataIndex: "data_inventory",
       key: "data_inventory",
-      width: 200,
+      width: 100,
       render: (data) => <InventoryCell data={data} />,
     },
     {
       title: "Chỉ số",
       dataIndex: "data_point",
       key: "data_point",
-      width: 120,
+      width: 10,
       render: (data, record) => (
         <DataPointCell
           data={data}
@@ -214,16 +213,16 @@ export default function PlayersManagementPage() {
     },
     {
       title: "Nhiệm vụ",
-      dataIndex: "data_side_task",
-      key: "data_side_task",
-      width: 150,
+      dataIndex: "data_task",
+      key: "data_task",
+      width: 10,
       render: (data) => <TaskCell data={data} />,
     },
     {
       title: "Trang bị",
       dataIndex: "items_body",
       key: "items_body",
-      width: 120,
+      width: 10,
       render: (data, record) => (
         <ItemsContainerCell
           data={data}
@@ -235,7 +234,7 @@ export default function PlayersManagementPage() {
       title: "Hành trang",
       dataIndex: "items_bag",
       key: "items_bag",
-      width: 120,
+      width: 50,
       render: (data, record) => (
         <ItemsContainerCell
           data={data}
@@ -249,7 +248,7 @@ export default function PlayersManagementPage() {
       title: "Rương đồ",
       dataIndex: "items_box",
       key: "items_box",
-      width: 120,
+      width: 50,
       render: (data, record) => (
         <ItemsContainerCell
           data={data}
