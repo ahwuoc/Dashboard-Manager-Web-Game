@@ -55,7 +55,7 @@ export type GiftcodeWithItemsAndOptions = Prisma.giftcodeGetPayload<{
     };
   };
 }>;
-
+import LinkPath from "@/app/common/link";
 interface CreateGiftcodeFormValues {
   code: string;
   count_left: number;
@@ -116,7 +116,7 @@ const GiftcodeManagementPage: React.FC = () => {
   };
 
   const handleEditOptionsClick = (giftcodeId: number) => {
-    router.push(`/admin/giftcodes/${giftcodeId}`);
+    router.push(`${LinkPath.manager_giftcodes}/${giftcodeId}`);
   };
 
   const handleEditSubmit = async (values: GiftcodeWithItemsAndOptions) => {

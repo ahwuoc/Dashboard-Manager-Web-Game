@@ -13,6 +13,7 @@ import {
   theme,
   Button,
 } from "antd";
+import LinkPath from "../common/link";
 import {
   HomeOutlined,
   UserOutlined,
@@ -29,37 +30,46 @@ import type { MenuProps } from "antd";
 const { Sider, Content } = Layout;
 const { Title, Text } = Typography;
 
-// Menu items với Ant Design icons
 const menuItems: MenuProps["items"] = [
   {
-    key: "/",
+    key: LinkPath.home,
     icon: <HomeOutlined />,
-    label: <Link href="/">Trang chủ</Link>,
+    label: <Link href={LinkPath.home}>Trang chủ</Link>,
   },
   {
-    key: "/admin/user",
+    key: LinkPath.manager_user,
     icon: <UserOutlined />,
-    label: <Link href="/admin/user">Quản lý User</Link>,
+    label: <Link href={LinkPath.manager_user}>Quản lý User</Link>,
   },
   {
-    key: "/admin/giftcodes",
+    key: LinkPath.manager_giftcodes,
     icon: <GiftOutlined />,
-    label: <Link href="/admin/giftcodes">Quản lý Giftcodes</Link>,
+    label: <Link href={LinkPath.manager_giftcodes}>Quản lý Giftcodes</Link>,
   },
   {
-    key: "/manage-shop",
+    key: LinkPath.manager_shop,
     icon: <ShoppingCartOutlined />,
-    label: <Link href="/admin/manage-shop">Quản lý shop</Link>,
+    label: <Link href={LinkPath.manager_shop}>Quản lý shop</Link>,
   },
   {
-    key: "/manage-item",
+    key: LinkPath.manager_item,
     icon: <BoxPlotOutlined />,
-    label: <Link href="/admin/manage-item">Quản lý item</Link>,
+    label: <Link href={LinkPath.manager_item}>Quản lý item</Link>,
   },
   {
-    key: "/about",
+    key: LinkPath.manager_open_item,
     icon: <InfoCircleOutlined />,
-    label: <Link href="/about">Giới thiệu</Link>,
+    label: <Link href={LinkPath.manager_open_item}>Quản lý open items</Link>,
+  },
+  {
+    key: LinkPath.manager_players,
+    icon: <InfoCircleOutlined />,
+    label: <Link href={LinkPath.manager_players}>Quản lý Players</Link>,
+  },
+  {
+    key: LinkPath.about,
+    icon: <InfoCircleOutlined />,
+    label: <Link href={LinkPath.about}>Giới thiệu</Link>,
   },
 ];
 

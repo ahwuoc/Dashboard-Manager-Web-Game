@@ -1,8 +1,5 @@
 import { giftcode_item_options, giftcode } from "@/generated/prisma";
-import { GiftcodeItemWithOptions } from "../admin/giftcodes/[id]/page";
-
 import HTTP from "../common/http";
-import { GiftcodeWithItemsAndOptions } from "../admin/giftcodes/page";
 
 type ApiRespose<T> = {
   data: T;
@@ -10,11 +7,10 @@ type ApiRespose<T> = {
 };
 
 export const apiGiftcode = {
-  getAll: async () =>
-    await HTTP.get<ApiRespose<GiftcodeWithItemsAndOptions[]>>("/api/giftcodes"),
+  getAll: async () => await HTTP.get<ApiRespose<any[]>>("/api/giftcodes"),
 
   getDetail: async (id: string) =>
-    await HTTP.get<ApiRespose<GiftcodeItemWithOptions>>(`/giftcode/${id}`),
+    await HTTP.get<ApiRespose<any>>(`/giftcode/${id}`),
 
   deleteOption: async (optionId: number) =>
     await HTTP.delete<ApiRespose<null>>(
@@ -34,7 +30,7 @@ export const apiGiftcode = {
     ),
 
   addOption: async (id: number, body: unknown) =>
-    await HTTP.post<ApiRespose<unknown>>(`/api/giftcodes/options?id=${id}`, {
+    await HTTP.post<ApiRespose<any>>(`/api/giftcodes/options?id=${id}`, {
       body,
     }),
 
@@ -42,9 +38,7 @@ export const apiGiftcode = {
     await HTTP.post<ApiRespose<unknown>>("/api/giftcodes", { body }),
 
   getById: async (id: number) =>
-    await HTTP.get<ApiRespose<GiftcodeItemWithOptions[]>>(
-      `/api/giftcodes/${id}`,
-    ),
+    await HTTP.get<ApiRespose<any[]>>(`/api/giftcodes/${id}`),
 
   delete: async (id: number) =>
     await HTTP.delete<ApiRespose<null>>(`/api/giftcodes?id=${id}`),

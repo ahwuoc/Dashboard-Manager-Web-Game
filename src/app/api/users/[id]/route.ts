@@ -36,6 +36,7 @@ export async function PUT(
         is_admin: body.is_admin,
         ban: body.ban,
         coin: body.coin,
+        active: body.active,
       },
     });
 

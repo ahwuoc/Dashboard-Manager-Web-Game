@@ -42,6 +42,7 @@ import {
   item_template,
 } from "@/generated/prisma";
 import { apiGifts } from "@/app/handler/apiGifts";
+import LinkPath from "@/app/common/link";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -299,7 +300,7 @@ export default function GiftPage() {
   };
 
   const handleBack = () => {
-    router.push("/admin/user");
+    router.push(`${LinkPath.manager_user}`);
   };
 
   // Columns cho bảng danh sách items

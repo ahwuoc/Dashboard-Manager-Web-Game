@@ -1,6 +1,6 @@
 import http from "../common/http";
 import { item_shop } from "@/generated/prisma";
-import type { ItemShopOptionWithTemplate } from "../admin/manage-shop/options/[id]/page";
+import type { ItemShopOptionWithTemplate } from "../admin/manager-shops/options/[id]/page";
 type ResponseApi<T> = {
   data: T;
   message: string;

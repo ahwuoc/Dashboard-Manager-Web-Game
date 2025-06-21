@@ -240,6 +240,7 @@ model intrinsic {
 model item_option_template {
   id                    Int                     @id
   NAME                  String                  @db.VarChar(255)
+  box_item_drop_options box_item_drop_options[]
   giftcode_item_options giftcode_item_options[]
   item_shop_option      item_shop_option[]
 }
@@ -274,21 +275,23 @@ model item_shop_option {
 }
 
 model item_template {
-  id             Int              @id
-  TYPE           Int
-  gender         Int              @db.SmallInt
-  NAME           String           @db.VarChar(255)
-  description    String           @db.VarChar(255)
-  icon_id        Int
-  part           Int
-  is_up_to_up    Boolean
-  power_require  Int
-  gold           Int              @default(0)
-  gem            Int              @default(0)
-  head           Int              @default(-1)
-  body           Int              @default(-1)
-  leg            Int              @default(-1)
-  giftcode_items giftcode_items[]
+  id               Int                @id
+  TYPE             Int
+  gender           Int                @db.SmallInt
+  NAME             String             @db.VarChar(255)
+  description      String             @db.VarChar(255)
+  icon_id          Int
+  part             Int
+  is_up_to_up      Boolean
+  power_require    Int
+  gold             Int                @default(0)
+  gem              Int                @default(0)
+  head             Int                @default(-1)
+  body             Int                @default(-1)
+  leg              Int                @default(-1)
+  box_item_actions box_item_actions[]
+  box_item_drops   box_item_drops[]
+  giftcode_items   giftcode_items[]
 }
 
 model map_template {
@@ -378,7 +381,7 @@ model player {
   enemies                 String   @db.Text
   data_offtrain           String   @default("[0,0]") @db.LongText
   data_intrinsic          String   @db.Text
-  data_item_time          String   @db.Text
+  data_item_time          String   @default("[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]") @db.Text
   data_task               String   @db.Text
   data_mabu_egg           String   @db.Text
   data_charm              String   @db.Text
@@ -610,4 +613,41 @@ model giftcode_items {
 
   @@index([giftcode_id], map: "fk_giftcode_items_giftcode_id")
   @@index([item_id], map: "fk_item_template")
+}
+
+model box_item_actions {
+  id               Int              @id @default(autoincrement())
+  template_item_id Int
+  open_mode        String           @default("random") @db.VarChar(50)
+  item_template    item_template    @relation(fields: [template_item_id], references: [id], onDelete: Cascade, map: "fk_template_id")
+  box_item_drops   box_item_drops[]
+
+  @@index([template_item_id], map: "fk_template_id")
+}
+
+model box_item_drop_options {
+  id                   Int                  @id @default(autoincrement())
+  drop_id              Int
+  option_id            Int
+  option_param         Int?                 @default(0)
+  box_item_drops       box_item_drops       @relation(fields: [drop_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "box_item_drop_options_ibfk_1")
+  item_option_template item_option_template @relation(fields: [option_id], references: [id], onDelete: Cascade, map: "fk_item_options")
+
+  @@index([option_id], map: "fk_item_options")
+  @@index([drop_id], map: "box_item_drop_options_ibfk_1")
+}
+
+model box_item_drops {
+  id                    Int                     @id @default(autoincrement())
+  box_action_id         Int
+  item_template_id      Int
+  quantity_min          Int?                    @default(1)
+  quantity_max          Int?                    @default(1)
+  drop_rate             Float?                  @default(100) @db.Float
+  box_item_drop_options box_item_drop_options[]
+  box_item_actions      box_item_actions        @relation(fields: [box_action_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "box_item_drops_ibfk_1")
+  item_template         item_template           @relation(fields: [item_template_id], references: [id], onDelete: Cascade, map: "fk_drop_template")
+
+  @@index([item_template_id], map: "fk_drop_template")
+  @@index([box_action_id], map: "box_item_drops_ibfk_1")
 }

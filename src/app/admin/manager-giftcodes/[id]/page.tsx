@@ -31,6 +31,7 @@ import { useRouter, useParams } from "next/navigation";
 import { apiOptions } from "@/app/handler/apiOptions";
 import { item_template, Prisma } from "@/generated/prisma";
 import { apiItems } from "@/app/handler/apiItems";
+import LinkPath from "@/app/common/link";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -123,8 +124,6 @@ const GiftcodeOptionsPage: React.FC = () => {
     try {
       setLoading(true);
       let giftcodeItemsResponse, optionsResponse, itemsResponse;
-
-      // Tách ra tránh lỗi
       try {
         giftcodeItemsResponse = await apiGiftcode.getById(giftcodeIdNumber);
         console.log("✅ Giftcode response:", giftcodeItemsResponse);
@@ -404,7 +403,7 @@ const GiftcodeOptionsPage: React.FC = () => {
               <Space align="center">
                 <Button
                   icon={<ArrowLeftOutlined />}
-                  onClick={() => router.push("/admin/giftcodes")}
+                  onClick={() => router.push(`${LinkPath.manager_giftcodes}`)}
                 >
                   Quay lại
                 </Button>

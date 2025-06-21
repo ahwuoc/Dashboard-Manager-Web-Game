@@ -35,6 +35,7 @@ import { useRouter } from "next/navigation";
 import { apiItems } from "@/app/handler/apiItems";
 import { GiftcodeItemType } from "@/app/common/constant";
 import { getGiftcodeItemTypeName } from "./components/getGiftcodeItemTypeName";
+import LinkPath from "@/app/common/link";
 const { Title, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
@@ -116,7 +117,7 @@ export default function ShopManagementPage() {
   };
 
   const handleEditOptionsClick = (itemId: number) => {
-    router.push(`/admin/manage-shop/options/${itemId}`);
+    router.push(`${LinkPath.manager_shop}/options/${itemId}`);
   };
 
   interface EditFormValues {
