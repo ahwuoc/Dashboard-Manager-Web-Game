@@ -19,7 +19,6 @@ export async function POST(request: NextRequest) {
         icon_spec: body.icon_spec,
       },
     });
-
     return NextResponse.json({ data: newItem });
   } catch (error) {
     return NextResponse.json(

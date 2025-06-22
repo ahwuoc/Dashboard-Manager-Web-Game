@@ -170,7 +170,7 @@ export default function ShopManagementPage() {
   const handleCreateSubmit = async (values: ItemFormValues) => {
     try {
       setCreateLoading(true);
-      const response = await apiShopItems.create(values);
+      const response = await apiShopItems.createItemsShop(values);
       if (response) {
         fetchShopItems();
         messageApi.success("Tạo shop item mới thành công! 🎉");
