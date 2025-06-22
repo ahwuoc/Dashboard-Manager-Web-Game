@@ -10,7 +10,7 @@ export const apiShopItems = {
     await http.get<ResponseApi<item_shop[]>>("/api/shop-items"),
   update: async (id: number, body: unknown) =>
     await http.put<unknown>(`/api/shop-items/${id}`, body),
-  create: async (id: number, body: unknown) =>
+  create: async (body: unknown) =>
     await http.put<unknown>(`/api/shop-items`, body),
   delete: async (id: number) =>
     await http.delete<unknown>(`/api/shop-items/${id}`),
