@@ -162,19 +162,16 @@ export default function ShopManagementPage() {
       setEditLoading(false);
     }
   };
-
-  // --- Handle Tạo Mới Item ---
   const handleCreateClick = () => {
     setIsCreateModalOpen(true);
-    createForm.resetFields(); // Đảm bảo form sạch khi mở
+    createForm.resetFields();
   };
 
   const handleCreateSubmit = async (values: ItemFormValues) => {
     try {
       setCreateLoading(true);
       const response = await apiShopItems.create(values);
-      if (response.status === 201) {
-        // Hoặc 200 tùy API của bạn
+      if (response) {
         fetchShopItems();
         messageApi.success("Tạo shop item mới thành công! 🎉");
         setIsCreateModalOpen(false);

@@ -4,6 +4,7 @@ export async function GET() {
   const items = await prisma.item_shop.findMany();
   return NextResponse.json({ data: items });
 }
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   try {
