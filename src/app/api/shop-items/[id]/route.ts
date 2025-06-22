@@ -38,6 +38,7 @@ export async function PUT(
       data: {
         temp_id: body.temp_id,
         is_new: body.is_new,
+        tab_id: body.tab_id,
         is_sell: body.is_sell,
         type_sell: body.type_sell,
         cost: body.cost,

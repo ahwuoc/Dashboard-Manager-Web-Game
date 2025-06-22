@@ -81,8 +81,6 @@ export default function GiftPage() {
   const [localStorageItems, setLocalStorageItems] = useState<
     SelectedItemWithOptions[]
   >([]);
-
-  // useEffect functions giữ nguyên logic
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -353,7 +351,13 @@ export default function GiftPage() {
       dataIndex: "quantity",
       key: "quantity",
       width: 100,
-      render: (quantity: number) => <Badge count={quantity} showZero />,
+      render: (quantity: number) => (
+        <Badge
+          count={quantity}
+          showZero
+          overflowCount={Number.MAX_SAFE_INTEGER}
+        />
+      ),
     },
     {
       title: "Options",
